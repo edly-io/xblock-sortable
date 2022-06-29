@@ -4,7 +4,7 @@
 		{{display_name}}
 	</h3>
 	<div class="problem-progress">
-		<span class="grade">{{user_score}}<span>/{{max_score}} point {% if graded %} graded {% else %} ungraded {% endif %}
+		{{progress_info}}
 	</div>
 	<div>
 	<div class="problem">
@@ -18,10 +18,10 @@
 				</li>
 			{% endfor %}
 		</ul>
-		<div class="indicator-container error {% if error_indicator %} is-hidden {% endif %}">
+		<div class="indicator-container error {% if not error_indicator %} is-hidden {% endif %}">
 			<span class="icon fa fa-close" aria-hidden="true"></span>
 		</div>
-		<div class="indicator-container success {% if success_indicator %} is-hidden {% endif %}">
+		<div class="indicator-container success {% if not success_indicator %} is-hidden {% endif %}">
 			<span class="icon fa fa-check" aria-hidden="true"></span>
 		</div>
 	</div>
@@ -29,12 +29,12 @@
 	<div class="action">
 		<button id="submit-answer" class="submit btn-brand" {% if remaining_attempts == 0 or completed %}disabled{% endif %}>{% trans "Submit" %}</button>
 		<div class="submission-feedback">
-			<din class="message"></din>
-			You have used <span class="attempts">{{attempts}}</span> of {{max_attempts}} attempts
+			<div class="message"></div>
+			<div class="attempts-info">{{attempts_info}}</div>
 		</div>
 	</div>
 	<div class="notification notification-submit error is-hidden" tabindex="-1">
 		<span class="icon fa" aria-hidden="true"></span>
-		<span class="notification-message">Incorrect (0/6 points)</span>
+		<span class="notification-message"></span>
 	</div>
 </div>
