@@ -19,7 +19,12 @@ class SortableXBlock(ScorableXBlockMixin ,XBlock):
     """
     An XBlock for sorting problems.
     """
-    FEEDBACK_MESSAGES = [_('Incorrect ({}/{})'), _('Correct ({}/{})')]
+    GRADED_FEEDBACK_MESSAGES = [_('Incorrect ({}/{})'), _('Correct ({}/{})')]
+    UNGRADED_FEEDBACK_MESSAGES = [_('Incorrect'), _('Correct')]
+    GRADED_TOP_MESSAGE = _('{}/{} point (graded)')
+    UPGRADED_TOP_MESSAGE = _('{} point possible (ungraded)')
+    ATTEMPTS_FEEDBACK = _('You have used {} of {} attempts')
+
     DEFAULT_DATA = ["Australia", "China", "Finland", "Pakistan", "United States"]
 
     weight = Float(
@@ -27,14 +32,6 @@ class SortableXBlock(ScorableXBlockMixin ,XBlock):
         help=_("Defines the number of points the problem is worth."),
         scope=Scope.settings,
         default=1,
-        enforce_type=True,
-    )
-
-    has_score = Boolean(
-        display_name=_("Is Garded?"),
-        help=_("A graded or ungraded problem"),
-        scope=Scope.settings,
-        default=True,
         enforce_type=True,
     )
 
@@ -178,7 +175,9 @@ class SortableXBlock(ScorableXBlockMixin ,XBlock):
         Add correct status i.e True or False with every option
         """
         states = []
-        if (len(items)==len(self.user_sequence)):
+        if self.attempts == 0:
+            states = [True for _ in range(len(items))]
+        elif (len(items)==len(self.user_sequence)):
             states = [state==index for index, state in enumerate(self.user_sequence)]
         else:
             states = [False for _ in range(len(items))]
@@ -195,7 +194,17 @@ class SortableXBlock(ScorableXBlockMixin ,XBlock):
             random.shuffle(items)
 
         user_score, max_score = self.get_weighted_score()
-        is_correct = int(user_score)==int(max_score)
+        is_correct = int(self.raw_earned)==int(self.raw_possible)
+        is_graded = getattr(self, 'graded', False)
+        
+        progress_info = ''   
+        if is_graded and bool(self.weight):
+            progress_info = SortableXBlock.GRADED_TOP_MESSAGE.format(user_score, int(max_score))
+        else:
+            progress_info = SortableXBlock.UPGRADED_TOP_MESSAGE.format(int(max_score))
+        
+        attemps_info = SortableXBlock.ATTEMPTS_FEEDBACK.format(self.attempts, self.max_attempts)
+
         return {
             'display_name': self.display_name,
             'question_text': self.question_text,
@@ -204,12 +213,12 @@ class SortableXBlock(ScorableXBlockMixin ,XBlock):
             'item_background_color': self.item_background_color,
             'item_text_color': self.item_text_color,
             'completed': self.completed,
-            'graded': self.has_score,
-            'user_score': user_score,
-            'max_score': max_score,
-            'error_indicator': self.attempts and is_correct,
-            'success_indicator': self.attempts and not is_correct,
-            'items': self.get_items_with_state(items)
+            'graded': is_graded,
+            'error_indicator': bool(self.attempts) and not is_correct,
+            'success_indicator': bool(self.attempts) and is_correct,
+            'items': self.get_items_with_state(items),
+            'progress_info': progress_info,
+            'attempts_info': attemps_info,
         }
     
     def student_view(self, context=None):
@@ -290,8 +299,17 @@ class SortableXBlock(ScorableXBlockMixin ,XBlock):
         
         earned = self.raw_earned*self.weight
         total = self.max_score()*self.weight
-
-        message = SortableXBlock.FEEDBACK_MESSAGES[int(self.raw_earned)].format(earned, total)
+        is_graded = getattr(self, 'graded', False)
+        
+        message = ''
+        progress_info = ''
+        if is_graded and bool(self.weight):
+            message = SortableXBlock.GRADED_FEEDBACK_MESSAGES[int(self.raw_earned)].format(earned, total)
+            progress_info = SortableXBlock.GRADED_TOP_MESSAGE.format(earned, int(total))
+        else:
+            message = SortableXBlock.UNGRADED_FEEDBACK_MESSAGES[int(self.raw_earned)]
+            progress_info = SortableXBlock.UPGRADED_TOP_MESSAGE.format(int(total))
+        attempts_info = SortableXBlock.ATTEMPTS_FEEDBACK.format(self.attempts, self.max_attempts)
         
         return {
             'correct': int(self.raw_earned)==int(self.max_score()),
@@ -300,6 +318,8 @@ class SortableXBlock(ScorableXBlockMixin ,XBlock):
             'remaining_attempts': self.remaining_attempts,
             'state': self.user_sequence,
             'message': message,
+            'progress_info': progress_info,
+            'attempts_info': attempts_info,
         }
 
     def studio_view(self, context):
@@ -333,7 +353,6 @@ class SortableXBlock(ScorableXBlockMixin ,XBlock):
         self.question_text = submissions['question_text']
         self.item_background_color = submissions['item_background_color']
         self.item_text_color = submissions['item_text_color']
-        self.has_score = bool(submissions['has_score'])
         self.weight = float(submissions['weight'])
         self.data = submissions['data']
 

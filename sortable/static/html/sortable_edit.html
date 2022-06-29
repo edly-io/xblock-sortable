@@ -52,7 +52,6 @@
         </div>
         <span class="tip setting-help">{{fields.max_attempts.help}}</span>
       </li>
-
       <li class="field comp-setting-entry metadata_entry">
         <div class="wrapper-comp-setting">
           <label class="label setting-label">
@@ -60,25 +59,12 @@
           </label>
             <input class="input setting-input weight"
              type="number"
-             min="1"
+             min="0"
              step="1"
              value="{{self.weight}}" />
         </div>
         <span class="tip setting-help">{{fields.weight.help}}</span>
       </li>
-      <li class="field comp-setting-entry metadata_entry">
-        <div class="wrapper-comp-setting">
-          <label class="label setting-label">
-            <span>{{fields.has_score.display_name}}:</span>
-          </label>
-          <select class="input setting-input has-score">
-            <option value="1" {% if self.has_score %}selected{% endif %}>True</option>
-            <option value="0" {% if not self.has_score %}selected{% endif %}>False</option>
-          </select>
-        </div>
-        <span class="tip setting-help">{{fields.has_score.help}}</span>
-      </li>
-
       <li class="field comp-setting-entry metadata_entry">
         <div class="wrapper-comp-setting items-list-edit">
           <label class="label setting-label">

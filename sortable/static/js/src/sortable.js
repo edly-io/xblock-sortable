@@ -35,11 +35,13 @@ function SortableXBlock(runtime, element) {
                 var $notification = $(element).find('.notification.notification-submit');
                 var $message = $(element).find('.notification.notification-submit .notification-message');
                 var $icon = $(element).find('.notification.notification-submit .icon');
-                var $attempts = $(element).find('.action .submission-feedback .attempts');
+                var $attemptsInfo = $(element).find('.action .submission-feedback .attempts-info');
                 var $errorIndicator = $(element).find('.indicator-container.error');
                 var $successIndicator = $(element).find('.indicator-container.success');
+                var $problemProgress = $(element).find('.problem-progress');
                 $message.html(response.message);
-                $attempts.text(response.attempts);
+                $attemptsInfo.html(response.attempts_info);
+                $problemProgress.html(response.progress_info);
                 $notification.removeClass('is-hidden');
                 if(response.correct) {
                     $notification.addClass('success');
