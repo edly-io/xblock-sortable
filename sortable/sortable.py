@@ -31,7 +31,7 @@ class SortableXBlock(ScorableXBlockMixin ,XBlock):
     )
 
     has_score = Boolean(
-        display_name=_("Is Garded?"),
+        display_name=_("Is Graded?"),
         help=_("A graded or ungraded problem"),
         scope=Scope.settings,
         default=True,
@@ -233,7 +233,7 @@ class SortableXBlock(ScorableXBlockMixin ,XBlock):
 
     def _get_submission_indexes(self, submission):
         """
-        Get postions of submission list
+        Get positions of submission list
         """
         assert len(submission) == len(self.data)
         user_submission = []
@@ -243,7 +243,7 @@ class SortableXBlock(ScorableXBlockMixin ,XBlock):
 
     def _calculate_grade(self, submission):
         """
-        Calculate grade based on correct possitions of strings
+        Calculate grade based on correct positions of strings
         """
         assert len(submission) == len(self.data)
         correctly_placed = 0
