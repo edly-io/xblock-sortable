@@ -62,20 +62,23 @@ function SortableXBlock(runtime, element) {
             },
             error: function (request, status, error) {
                 var $message = $(element).find('.submission-feedback .message');
-                $message.html(request.responseJSON.error);
+                var errText = (request.responseJSON && request.responseJSON.error)
+                    || 'Submission failed. Please try again.';
+                $message.html(errText);
                 $message.addClass('error');
                 $message.show();
                 $(element).find('#submit-answer').prop('disabled', true);
-                setTimeout(function(){ 
+                setTimeout(function(){
                     $message.hide();
                     $message.removeClass('error');
                     $message.html('');
+                    $(element).find('#submit-answer').prop('disabled', false);
                 }, 4000);
             }
         });
     });
 
-    is_button_disabled = $(element).find('#submit-answer').is(":disabled");
+    var is_button_disabled = $(element).find('#submit-answer').is(":disabled");
 
     if (!is_button_disabled) {
         $(element).find('.items-list').sortable(
