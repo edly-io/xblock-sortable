@@ -28,8 +28,15 @@ function SortableXBlockEdit(runtime, element) {
         updateItemsOrder();
     });
 
+    $element.on('keydown', '.remove-item', function(e) {
+        if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            $(this).trigger('click');
+        }
+    });
+
     $element.on('click', '#add-item', function() {
-    	var itemHtml = '<div class="item"><span class="remove-item">&#10006;</span><span class="item-position"></span><span class="item-text" contenteditable="true">New item</span>';
+    	var itemHtml = '<div class="item"><span class="remove-item" tabindex="0" role="button" aria-label="Remove item">&#10006;</span><span class="item-position"></span><span class="item-text" contenteditable="true">New item</span></div>';
         $('.items-list-edit', element).append(itemHtml);
         updateItemsOrder();
     });

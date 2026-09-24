@@ -17,7 +17,7 @@
           <label class="label setting-label">
             <span>{{fields.question_text.display_name}}:</span>
           </label>
-           <textarea class="field-data-control question-text" rows=3 cols=70>{{self.question_text}}</textarea>
+           <textarea class="field-data-control question-text" rows=3>{{self.question_text}}</textarea>
         </div>
         <span class="tip setting-help">{{fields.question_text.help}}</span>
       </li>
@@ -86,7 +86,7 @@
           </label>
            {% for item in data %}
             <div class="item">
-              <span class="remove-item">&#10006;</span>
+              <span class="remove-item" tabindex="0" role="button" aria-label="{% trans 'Remove item' %}">&#10006;</span>
               <span class="item-position">{{forloop.counter}}</span>
               <span class="item-text" contenteditable="true">{{item}}</span>
             </div>

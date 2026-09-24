@@ -225,7 +225,7 @@ class SortableXBlock(ScorableXBlockMixin ,XBlock):
             i18n_service=self.i18n_service
         ))
         frag.add_css(self.resource_string("static/css/sortable.css"))
-        frag.add_javascript(self.resource_string("static/js/vendor/sortable.min.js"))
+        frag.add_javascript(self.resource_string("static/js/vendor/jquery.ui.touch-punch.min.js"))
         frag.add_javascript(self.resource_string("static/js/src/sortable.js"))
 
         frag.initialize_js('SortableXBlock')
