@@ -1,12 +1,28 @@
-.sortable_block_edit .items-list-edit .item {
-  padding: 0;
-  margin: 0 auto;
-  width: 80%;
+/* Step 6: responsive textarea — no cols attribute forces width */
+.sortable_block_edit .question-text {
+    width: 100%;
+    box-sizing: border-box;
+    resize: vertical;
 }
+
+/* Step 16: flexbox replaces float-based item layout */
+.sortable_block_edit .items-list-edit .item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.25rem 0;
+    margin: 0.25rem 0;
+    width: 100%;
+}
+
+/* Step 18: item-text grows to fill available space */
 .sortable_block_edit .items-list-edit .item-text {
   -moz-box-sizing: border-box !important;
   -webkit-box-sizing: border-box !important;
   box-sizing: border-box !important;
+  flex: 1;
+  min-width: 0;
+  float: none;
   display: block;
   padding: 12px !important;
   color: black;
@@ -35,32 +51,71 @@
   color: white;
   margin-right: 8px;
 }
+
+/* Step 19: remove-item replaces float:right with flex child, proper touch target */
 .sortable_block_edit .items-list-edit .remove-item {
-  float: right;
-  cursor: pointer;
-  margin: 12px !important;
-  color: #ffffff;
+    flex-shrink: 0;
+    float: none;
+    cursor: pointer;
+    min-width: 2.25rem;
+    min-height: 2.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    /* Step 1: color changed from #ffffff to #666666 */
+    color: #666666;
+    margin: 0;
+    border-radius: 3px;
 }
+.sortable_block_edit .items-list-edit .remove-item:hover {
+    background: #f0f0f0;
+    color: #333;
+}
+
+/* Step 17: item-position — remove negative margin hack, use flex child */
 .sortable_block_edit .items-list-edit .item-position {
-  float: left;
-  margin: 0px 0px 0px -50px;
-  border: 2px solid;
-  padding: 11px;
-  border-radius: 2px;
+    flex-shrink: 0;
+    width: 2rem;
+    text-align: center;
+    border: 2px solid;
+    padding: 0.4rem;
+    border-radius: 2px;
+    margin: 0;
 }
+
+/* Step 20: remove magic 110px margin-left */
 .sortable_block_edit #add-item {
-  display: block;
-  margin-left: 110px;
-  background: #0696e2;
-  color: #ffffff;
-  border: none;
-  border-radius: 2px;
-  padding: 10px;
-  width: 100px;
+    display: block;
+    margin-left: 0;
+    margin-top: 0.75rem;
+    background: #0696e2;
+    color: #ffffff;
+    border: none;
+    border-radius: 2px;
+    padding: 10px;
+    width: 100px;
 }
+
+/* Step 20: remove magic 110px margin-left */
 .sortable_block_edit .items-error {
-  margin-left: 110px;
-  color: red;
-  font-size: 12px;
-  display: none;
+    margin-left: 0;
+    color: red;
+    font-size: 0.75rem;
+    display: none;
+}
+
+/* Step 21: Studio mobile media query */
+@media (max-width: 576px) {
+    .sortable_block_edit .items-list-edit .item {
+        flex-wrap: wrap;
+    }
+    .sortable_block_edit #add-item {
+        width: 100%;
+    }
+    .sortable_block_edit .xblock-actions .action-item a {
+        min-height: 2.75rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
 }

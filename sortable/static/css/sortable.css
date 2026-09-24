@@ -20,12 +20,15 @@
   margin-bottom: 1.41575em;
 }
 
+/* Step 12: flexbox layout, touch-friendly sizing, no !important on padding */
 .sortable_block .items-list li {
   -moz-box-sizing: border-box !important;
   -webkit-box-sizing: border-box !important;
   box-sizing: border-box !important;
-  display: block;
-  padding: 12px !important;
+  display: flex;
+  align-items: center;
+  min-height: 2.75rem;
+  padding: 0.75rem 1rem;
   color: black;
   background: #f2f2f2;
   counter-increment: number;
@@ -48,7 +51,18 @@
   margin-right: 10px;
 }
 
+/* Step 13: drag handle hint via ::after */
+.sortable_block .items-list li.item::after {
+    content: '⠿';
+    margin-left: auto;
+    opacity: 0.3;
+    font-size: 1.1rem;
+    flex-shrink: 0;
+}
+
+/* Step 7: counter-reset added to prevent counter leaking across XBlock instances */
 .sortable_block ul.items-list, .sortable_block ul.ui-sortable{
+  counter-reset: number;
   padding-inline-start: 0;
   margin-left: 0;
   padding: 0;
@@ -70,9 +84,9 @@
   display: none;
 }
 
+/* Step 8: float: none to fix notification block display */
 .sortable_block .notification {
-  float: left;
-  margin-top: 10px;
+  float: none;
   padding: 8px 10px 4px 10px;
   line-height: 1.5em;
   box-sizing: border-box;
@@ -98,6 +112,29 @@
   color: #008100;
 }
 
+/* Step 10: spacing between notification and action replaces removed <br/> */
+.sortable_block .action {
+  margin-top: 1rem;
+}
+
 .is-hidden {
   display: none;
+}
+
+/* Step 15: disable move cursor on touch/tablet */
+@media (max-width: 768px) {
+    .sortable_block .items-list li.item {
+        cursor: default;
+    }
+}
+
+/* Step 14: smaller padding and full-width submit on mobile */
+@media (max-width: 576px) {
+    .sortable_block .items-list li.item {
+        padding: 0.625rem 0.75rem;
+    }
+    .sortable_block #submit-answer {
+        width: 100%;
+        min-height: 2.75rem;
+    }
 }

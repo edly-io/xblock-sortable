@@ -61,7 +61,7 @@ function SortableXBlock(runtime, element) {
                 }
             },
             error: function (request, status, error) {
-                var $message = $(element).find('.feedback .message');
+                var $message = $(element).find('.submission-feedback .message');
                 $message.html(request.responseJSON.error);
                 $message.addClass('error');
                 $message.show();

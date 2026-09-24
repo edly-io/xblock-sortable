@@ -4,14 +4,14 @@
 		{{display_name}}
 	</h3>
 	<div class="problem-progress">
-		<span class="grade">{{user_score}}<span>/{{max_score}} point {% if graded %} graded {% else %} ungraded {% endif %}
+		<span class="grade">{{user_score}}</span>/{{max_score}} point {% if graded %} graded {% else %} ungraded {% endif %}
 	</div>
 	<div>
 	<div class="problem">
 		<p class="problem-statement">
 			{{question_text}}
 		</p>
-		<ul class="items-list">
+		<ul class="items-list" aria-label="{% trans 'Sort items by dragging to reorder' %}">
 			{% for item, state in items %}
 				<li class="item {% if not state %} incorrect {% endif%}" style="background: {{item_background_color}}; color: {{item_text_color}}">
 					{{item}}
@@ -25,16 +25,15 @@
 			<span class="icon fa fa-check" aria-hidden="true"></span>
 		</div>
 	</div>
-	<br/>
+	<div class="notification notification-submit error is-hidden" tabindex="-1" aria-live="polite" aria-atomic="true" role="status">
+		<span class="icon fa" aria-hidden="true"></span>
+		<span class="notification-message">Incorrect (0/6 points)</span>
+	</div>
 	<div class="action">
 		<button id="submit-answer" class="submit btn-brand" {% if remaining_attempts == 0 or completed %}disabled{% endif %}>{% trans "Submit" %}</button>
 		<div class="submission-feedback">
-			<din class="message"></din>
+			<span class="message"></span>
 			You have used <span class="attempts">{{attempts}}</span> of {{max_attempts}} attempts
 		</div>
-	</div>
-	<div class="notification notification-submit error is-hidden" tabindex="-1">
-		<span class="icon fa" aria-hidden="true"></span>
-		<span class="notification-message">Incorrect (0/6 points)</span>
 	</div>
 </div>
