@@ -6,18 +6,28 @@
 	<div class="problem-progress">
 		<span class="grade">{{user_score}}</span>/{{max_score}} point {% if graded %} graded {% else %} ungraded {% endif %}
 	</div>
-	<div>
 	<div class="problem">
 		<p class="problem-statement">
 			{{question_text}}
 		</p>
-		<ul class="items-list" aria-label="{% trans 'Sort items by dragging to reorder' %}">
-			{% for item, state in items %}
-				<li class="item {% if not state %} incorrect {% endif%}" style="background: {{item_background_color}}; color: {{item_text_color}}">
-					{{item}}
+		<ul class="items-list{% if locked %} is-locked{% endif %}" aria-label="{% trans 'Sort the items by dragging them or with the move up and move down buttons' %}">
+			{% for item, state_class in items %}
+				<li class="item{% if state_class %} {{ state_class }}{% endif %}"{% if item_style %} style="{{ item_style }}"{% endif %}>
+					<span class="item-handle" aria-hidden="true"></span>
+					<span class="item-position" aria-hidden="true"></span>
+					<span class="item-text">{{item}}</span>
+					<span class="item-moves">
+						<button type="button" class="move-up" aria-label="{% trans 'Move up' %}"{% if forloop.first or locked %} disabled{% endif %}>
+							<svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M16 12.3V14.83L12 11.77L8 14.83V12.3L12 9.23L16 12.3Z" fill="currentColor"/></svg>
+						</button>
+						<button type="button" class="move-down" aria-label="{% trans 'Move down' %}"{% if forloop.last or locked %} disabled{% endif %}>
+							<svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M16 9.33V11.87L12 14.93L8 11.87V9.33L12 12.4L16 9.33Z" fill="currentColor"/></svg>
+						</button>
+					</span>
 				</li>
 			{% endfor %}
 		</ul>
+		<div class="sortable-live" aria-live="polite" data-moved-message="{% trans 'Moved to position {position} of {total}' %}"></div>
 		<div class="indicator-container error {% if error_indicator %} is-hidden {% endif %}">
 			<span class="icon fa fa-close" aria-hidden="true"></span>
 		</div>
@@ -30,7 +40,7 @@
 		<span class="notification-message">Incorrect (0/6 points)</span>
 	</div>
 	<div class="action">
-		<button id="submit-answer" class="submit btn-brand" {% if remaining_attempts == 0 or completed %}disabled{% endif %}>{% trans "Submit" %}</button>
+		<button id="submit-answer" class="submit btn-brand"{% if locked %} disabled{% endif %}>{% trans "Submit" %}</button>
 		<div class="submission-feedback">
 			<span class="message"></span>
 			You have used <span class="attempts">{{attempts}}</span> of {{max_attempts}} attempts
