@@ -1,4 +1,4 @@
-/* CSS for SortableXBlock */
+/* CSS for SortableXBlock. A neutral base: the LMS theme adds the Uber look. */
 .sortable_block .problem-header {
   margin-bottom: 10px;
   font-size: 1.35em;
@@ -16,64 +16,120 @@
   padding-top: 20px;
 }
 
-.sortable_block .problem .problem-statement p{
+.sortable_block .problem .problem-statement p {
   margin-bottom: 1.41575em;
 }
 
-/* Step 12: flexbox layout, touch-friendly sizing, no !important on padding */
-.sortable_block .items-list li {
-  -moz-box-sizing: border-box !important;
-  -webkit-box-sizing: border-box !important;
-  box-sizing: border-box !important;
+/* counter-reset keeps the numbering from leaking across XBlock instances */
+.sortable_block ul.items-list {
+  counter-reset: number;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Author colours arrive as --sortable-item-bg / --sortable-item-color, and
+   only when they differ from the defaults. */
+.sortable_block .items-list li.item {
+  box-sizing: border-box;
   display: flex;
   align-items: center;
+  gap: 10px;
   min-height: 2.75rem;
-  padding: 0.75rem 1rem !important;
-  color: black;
-  background: #f2f2f2;
+  margin-bottom: 10px;
+  padding: 0.5rem 0.75rem;
+  border: 2px solid transparent;
+  border-radius: 2px;
+  background: var(--sortable-item-bg, #f2f2f2);
+  color: var(--sortable-item-color, #000000);
   counter-increment: number;
   cursor: move;
   outline: none;
-  border-radius: 2px;
-  margin-bottom: 10px;
 }
 
-.sortable_block .items-list .incorrect{
-  border: 2px solid #b20610;
+/* While dragging, jQuery UI leaves the dragged row at its old place in the DOM
+   and puts a placeholder where it will land. The placeholder takes the number;
+   the dragged row shows its landing slot, set by the JS. */
+.sortable_block .items-list li.ui-sortable-helper {
+  counter-increment: none;
 }
 
-.sortable_block .items-list .corrrect{
-  border: 2px solid greenyellow;
+.sortable_block .items-list li.ui-sortable-helper .item-position::before {
+  content: attr(data-position) ".";
 }
 
-.sortable_block .items-list li::before {
-  content: counter(number);
-  margin-right: 10px;
-  flex-shrink: 0;
+.sortable_block .items-list .item-handle {
+  flex: 0 0 auto;
+  box-sizing: border-box;
+  width: 16px;
+  height: 10px;
+  border-top: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  opacity: 0.4;
 }
 
-/* Step 13: drag handle hint via ::after */
-.sortable_block .items-list li.item::after {
-    content: '⠿';
-    margin-left: auto;
-    opacity: 0.3;
-    font-size: 1.1rem;
-    flex-shrink: 0;
+.sortable_block .items-list .item-position::before {
+  content: counter(number) ".";
 }
 
-/* Step 7: counter-reset added to prevent counter leaking across XBlock instances */
-.sortable_block ul.items-list, .sortable_block ul.ui-sortable{
-  counter-reset: number;
-  padding-inline-start: 0;
-  margin-left: 0;
+.sortable_block .items-list .item-text {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.sortable_block .items-list .item-moves {
+  display: flex;
+  flex: 0 0 auto;
+  gap: 4px;
+}
+
+.sortable_block .items-list .item-moves button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
   padding: 0;
+  border: 1px solid #c8c8c8;
+  border-radius: 50%;
+  background: #ffffff;
+  color: #000000;
+  cursor: pointer;
 }
 
-.sortable_block button:disabled, .sortable_block button[disabled] {
-  background-color: #999999 !important;
-  color: #fff !important;
+.sortable_block .items-list .item-moves button:disabled {
+  opacity: 0.4;
+  cursor: default;
 }
 
+.sortable_block .items-list .incorrect {
+  border-color: #b20610;
+}
+
+.sortable_block .items-list .correct {
+  border-color: #008100;
+}
+
+.sortable_block .items-list.is-locked li.item {
+  cursor: default;
+}
+
+/* Screen-reader-only announcements of the new position after a move */
+.sortable_block .sortable-live {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.sortable_block .action .submit:disabled {
+  background-color: #999999;
+  color: #fff;
+}
 
 .sortable_block .feedback .error {
   color: red;
@@ -85,7 +141,7 @@
   display: none;
 }
 
-/* Step 8: float: none to fix notification block display */
+/* float: none fixes the notification block display */
 .sortable_block .notification {
   float: none;
   padding: 8px 10px 4px 10px;
@@ -99,21 +155,19 @@
 .sortable_block .notification.error {
   border-top: 3px solid #b20610;
 }
-.indicator-container.error .icon, .sortable_block .notification.error .icon{
+.indicator-container.error .icon, .sortable_block .notification.error .icon {
   margin-right: 15px;
   color: #b20610;
 }
 
-
 .sortable_block .notification.success {
   border-top: 3px solid #008100;
 }
-.indicator-container.success .icon, .sortable_block .notification.success .icon{
+.indicator-container.success .icon, .sortable_block .notification.success .icon {
   margin-right: 15px;
   color: #008100;
 }
 
-/* Step 10: spacing between notification and action replaces removed <br/> */
 .sortable_block .action {
   margin-top: 1rem;
 }
@@ -122,20 +176,17 @@
   display: none;
 }
 
-/* Step 15: disable move cursor on touch/tablet */
+/* No move cursor on touch/tablet */
 @media (max-width: 768px) {
-    .sortable_block .items-list li.item {
-        cursor: default;
-    }
+  .sortable_block .items-list li.item {
+    cursor: default;
+  }
 }
 
-/* Step 14: smaller padding and full-width submit on mobile */
+/* Full-width submit on mobile */
 @media (max-width: 576px) {
-    .sortable_block .items-list li.item {
-        padding: 0.625rem 0.75rem;
-    }
-    .sortable_block #submit-answer {
-        width: 100%;
-        min-height: 2.75rem;
-    }
+  .sortable_block #submit-answer {
+    width: 100%;
+    min-height: 2.75rem;
+  }
 }

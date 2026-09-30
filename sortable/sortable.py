@@ -160,13 +160,29 @@ class SortableXBlock(ScorableXBlockMixin ,XBlock):
 
     def shuffle_data_based_on_submission(self, submissions):
         """
-        Get data based on last submission
+        Put the items back in the order the learner submitted them.
+        `submissions[i]` is the submitted position of `self.data[i]`.
         """
-        data = []
-        for index in submissions:
-            data.append(self.data[index])
+        data = [None] * len(submissions)
+        for index, position in enumerate(submissions):
+            data[position] = self.data[index]
         return data
-    
+
+    def _has_current_submission(self):
+        """
+        True when the learner's saved order still fits the items: one distinct
+        position per item. If the author adds or removes items afterwards, the
+        saved order no longer applies.
+        """
+        return bool(self.attempts) and sorted(self.user_sequence) == list(range(len(self.data)))
+
+    def _is_locked(self):
+        """
+        Nothing left to do: the answer is correct or no attempts remain. Read
+        from the current settings, so an author raising the limit unlocks it.
+        """
+        return int(self.raw_earned) >= int(self.max_score()) or self.remaining_attempts <= 0
+
     def get_weighted_score(self):
         """
         Get weighted scores
@@ -175,21 +191,37 @@ class SortableXBlock(ScorableXBlockMixin ,XBlock):
 
     def get_items_with_state(self, items):
         """
-        Add correct status i.e True or False with every option
+        Pair each displayed item with its state class: 'correct' or 'incorrect'
+        after a submission, '' before the first one.
         """
-        states = []
-        if (len(items)==len(self.user_sequence)):
-            states = [state==index for index, state in enumerate(self.user_sequence)]
-        else:
-            states = [False for _ in range(len(items))]
-        return zip(items, states)
-    
+        if not self._has_current_submission():
+            return [(item, '') for item in items]
+        return [
+            (item, 'correct' if item == self.data[position] else 'incorrect')
+            for position, item in enumerate(items)
+        ]
+
+    def item_style(self):
+        """
+        Inline CSS custom properties for author-chosen item colours. Colours
+        left at their defaults emit nothing, so the theme's own styles apply.
+        """
+        properties = []
+        for field_name, css_property in (
+            ('item_background_color', '--sortable-item-bg'),
+            ('item_text_color', '--sortable-item-color'),
+        ):
+            value = getattr(self, field_name).strip()
+            if value and value.lower() != self.fields[field_name].default.lower():
+                properties.append('{}: {}'.format(css_property, value))
+        return '; '.join(properties)
+
     def student_view_data(self):
         """
         Context for student view
         """
         items = self.data[:]
-        if self.attempts and self.user_sequence:
+        if self._has_current_submission():
             items = self.shuffle_data_based_on_submission(self.user_sequence)
         else:
             random.shuffle(items)
@@ -209,6 +241,8 @@ class SortableXBlock(ScorableXBlockMixin ,XBlock):
             'max_score': max_score,
             'error_indicator': self.attempts and is_correct,
             'success_indicator': self.attempts and not is_correct,
+            'item_style': self.item_style(),
+            'locked': self._is_locked(),
             'items': self.get_items_with_state(items)
         }
     
@@ -233,13 +267,23 @@ class SortableXBlock(ScorableXBlockMixin ,XBlock):
 
     def _get_submission_indexes(self, submission):
         """
-        Get positions of submission list
+        Get positions of submission list. Repeated items each take the next
+        unused position, so the result is always a reordering of the positions.
         """
         assert len(submission) == len(self.data)
         user_submission = []
         for item in self.data:
-            user_submission.append(submission.index(item))
-        return user_submission 
+            user_submission.append(next(
+                position for position, value in enumerate(submission)
+                if value == item and position not in user_submission
+            ))
+        return user_submission
+
+    def _submission_marks(self, submission):
+        """
+        'correct' or 'incorrect' for each submitted position, by item text.
+        """
+        return ['correct' if value == item else 'incorrect' for value, item in zip(submission, self.data)]
 
     def _calculate_grade(self, submission):
         """
@@ -257,7 +301,7 @@ class SortableXBlock(ScorableXBlockMixin ,XBlock):
         """
         Validates if `submit_answer` handler should be executed
         """
-        if not self.remaining_attempts:
+        if self.remaining_attempts <= 0:
             raise JsonHandlerError(
                 409,
                 self.i18n_service.gettext("Max number of attempts reached")
@@ -270,7 +314,7 @@ class SortableXBlock(ScorableXBlockMixin ,XBlock):
         score = self._calculate_grade(submission)
         
         self.set_score(Score(score, self.max_score()))
-        self.completed = int(self.raw_earned) or not self.remaining_attempts
+        self.completed = self._is_locked()
         self.user_sequence = self._get_submission_indexes(submission)
         self.publish_grade(self.score, False)
 
@@ -299,6 +343,7 @@ class SortableXBlock(ScorableXBlockMixin ,XBlock):
             'grade': earned,
             'remaining_attempts': self.remaining_attempts,
             'state': self.user_sequence,
+            'marks': self._submission_marks(submission),
             'message': message,
         }
 
