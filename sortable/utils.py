@@ -16,5 +16,5 @@ class DummyTranslationService(object):
     """
     Dummy drop-in replacement for i18n XBlock service
     """
-    gettext = _
-    ngettext = ngettext_fallback
+    gettext = staticmethod(_)
+    ngettext = staticmethod(ngettext_fallback)
