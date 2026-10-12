@@ -129,7 +129,7 @@ function SortableXBlock(runtime, element) {
                     $successIndicator.addClass('is-hidden');
                 }
                 setItemsState(response.marks);
-                if(response.correct || response.remaining_attempts <= 0) {
+                if(response.correct || (response.remaining_attempts !== null && response.remaining_attempts <= 0)) {
                     lock();
                 } else {
                     $submit.prop('disabled', false);

@@ -58,7 +58,7 @@ class SortableXBlock(ScorableXBlockMixin ,XBlock):
         display_name=_("Maximum attempts"),
         help=_(
             "Defines the number of times a student can try to answer this problem. "
-            "If the value is not set, infinite attempts are allowed."
+            "Leave it blank or set 0 for unlimited attempts."
         ),
         scope=Scope.settings,
         default=1,
@@ -126,8 +126,15 @@ class SortableXBlock(ScorableXBlockMixin ,XBlock):
     
     @property
     def remaining_attempts(self):
-        """Remaining number of attempts"""
+        """Remaining number of attempts, or None when attempts are unlimited (not set or 0)"""
+        if not self.max_attempts:
+            return None
         return self.max_attempts - self.attempts
+
+    def _attempts_exhausted(self):
+        """True when a limit is set and the learner has used all attempts"""
+        remaining = self.remaining_attempts
+        return remaining is not None and remaining <= 0
     
     @property
     def score(self):
@@ -181,7 +188,7 @@ class SortableXBlock(ScorableXBlockMixin ,XBlock):
         Nothing left to do: the answer is correct or no attempts remain. Read
         from the current settings, so an author raising the limit unlocks it.
         """
-        return int(self.raw_earned) >= int(self.max_score()) or self.remaining_attempts <= 0
+        return int(self.raw_earned) >= int(self.max_score()) or self._attempts_exhausted()
 
     def get_weighted_score(self):
         """
@@ -301,7 +308,7 @@ class SortableXBlock(ScorableXBlockMixin ,XBlock):
         """
         Validates if `submit_answer` handler should be executed
         """
-        if self.remaining_attempts <= 0:
+        if self._attempts_exhausted():
             raise JsonHandlerError(
                 409,
                 self.i18n_service.gettext("Max number of attempts reached")
@@ -373,8 +380,22 @@ class SortableXBlock(ScorableXBlockMixin ,XBlock):
         """
         Handles studio save.
         """
+        # Blank means unlimited attempts; validate before changing anything.
+        max_attempts = str(submissions['max_attempts'] or '').strip()
+        try:
+            max_attempts = int(max_attempts) if max_attempts else None
+        except ValueError:
+            max_attempts = -1
+        if max_attempts is not None and max_attempts < 0:
+            return {
+                'result': 'error',
+                'messages': [self.i18n_service.gettext(
+                    "Maximum attempts must be a whole number. Leave it blank or set 0 for unlimited attempts."
+                )],
+            }
+
         self.display_name = submissions['display_name']
-        self.max_attempts = submissions['max_attempts']
+        self.max_attempts = max_attempts
         self.question_text = submissions['question_text']
         self.item_background_color = submissions['item_background_color']
         self.item_text_color = submissions['item_text_color']

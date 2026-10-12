@@ -46,9 +46,9 @@
           </label>
             <input class="input setting-input max-attempts"
              type="number"
-             min="1"
+             min="0"
              step="1" 
-             value="{{self.max_attempts}}" />
+             value="{{self.max_attempts|default_if_none:''}}" />
         </div>
         <span class="tip setting-help">{{fields.max_attempts.help}}</span>
       </li>

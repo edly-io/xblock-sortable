@@ -43,7 +43,11 @@
 		<button id="submit-answer" class="submit btn-brand"{% if locked %} disabled{% endif %}>{% trans "Submit" %}</button>
 		<div class="submission-feedback">
 			<span class="message"></span>
-			You have used <span class="attempts">{{attempts}}</span> of {{max_attempts}} attempts
+			{% if max_attempts %}
+			{% blocktrans %}You have used <span class="attempts">{{attempts}}</span> of {{max_attempts}} attempts{% endblocktrans %}
+			{% else %}
+			{% blocktrans %}You have used <span class="attempts">{{attempts}}</span> attempts{% endblocktrans %}
+			{% endif %}
 		</div>
 	</div>
 </div>
