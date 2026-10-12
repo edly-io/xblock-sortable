@@ -58,7 +58,7 @@ class SortableXBlock(ScorableXBlockMixin ,XBlock):
         display_name=_("Maximum attempts"),
         help=_(
             "Defines the number of times a student can try to answer this problem. "
-            "If the value is not set, infinite attempts are allowed."
+            "Leave it blank or set 0 for unlimited attempts."
         ),
         scope=Scope.settings,
         default=1,
@@ -390,7 +390,7 @@ class SortableXBlock(ScorableXBlockMixin ,XBlock):
             return {
                 'result': 'error',
                 'messages': [self.i18n_service.gettext(
-                    "Maximum attempts must be a whole number of 0 or more, or blank for unlimited attempts."
+                    "Maximum attempts must be a whole number. Leave it blank or set 0 for unlimited attempts."
                 )],
             }
 
