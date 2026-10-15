@@ -47,9 +47,11 @@
             <input class="input setting-input max-attempts"
              type="number"
              min="0"
-             step="1" 
+             step="1"
+             aria-describedby="max-attempts-error-{{self.scope_ids.usage_id}}"
              value="{{self.max_attempts|default_if_none:''}}" />
         </div>
+        <span class="max-attempts-error" id="max-attempts-error-{{self.scope_ids.usage_id}}" role="alert" hidden>{% trans "Maximum attempts must be 0 or a positive whole number. Leave it blank or set 0 for unlimited attempts." %}</span>
         <span class="tip setting-help">{{fields.max_attempts.help}}</span>
       </li>
 

@@ -41,7 +41,30 @@ function SortableXBlockEdit(runtime, element) {
         updateItemsOrder();
     });
 
-    $element.find('.save-button').bind('click', function() {
+    var $maxAttempts = $element.find('.max-attempts');
+    var $maxAttemptsError = $element.find('.max-attempts-error');
+
+    function showMaxAttemptsError(message) {
+        if (message) {
+            $maxAttemptsError.text(message);
+        }
+        $maxAttempts.attr('aria-invalid', 'true');
+        $maxAttemptsError.prop('hidden', false);
+        $maxAttempts.trigger('focus');
+    }
+
+    $maxAttempts.on('input', function() {
+        $maxAttempts.removeAttr('aria-invalid');
+        $maxAttemptsError.prop('hidden', true);
+    });
+
+    $element.find('.save-button').bind('click', function(e) {
+        e.preventDefault();
+        // min="0" step="1": the browser flags negatives, decimals and non-numbers.
+        if (!$maxAttempts[0].checkValidity()) {
+            showMaxAttemptsError();
+            return;
+        }
         var data = {
             'display_name': $element.find('.display-name').val(),
             'max_attempts': $element.find(".max-attempts").val(),
@@ -63,6 +86,9 @@ function SortableXBlockEdit(runtime, element) {
                 runtime.notify('save', {state: 'end'});
             } else {
                 var message = response.messages.join(", ");
+                // The only server-side error today; show it next to the field,
+                // since some Studio editors don't display runtime notify errors.
+                showMaxAttemptsError(message);
                 runtime.notify('error', {
                     'title': "There was an error with your form.",
                     'message': message
