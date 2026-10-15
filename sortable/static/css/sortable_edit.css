@@ -104,6 +104,15 @@
     display: none;
 }
 
+.sortable_block_edit .max-attempts-error {
+    color: #c32d3a;
+    font-size: inherit;
+}
+
+.sortable_block_edit .max-attempts-error[hidden] {
+    display: none;
+}
+
 /* Step 21: Studio mobile media query */
 @media (max-width: 576px) {
     .sortable_block_edit .items-list-edit .item {

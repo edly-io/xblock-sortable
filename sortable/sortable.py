@@ -390,7 +390,8 @@ class SortableXBlock(ScorableXBlockMixin ,XBlock):
             return {
                 'result': 'error',
                 'messages': [self.i18n_service.gettext(
-                    "Maximum attempts must be a whole number. Leave it blank or set 0 for unlimited attempts."
+                    "Maximum attempts must be 0 or a positive whole number. "
+                    "Leave it blank or set 0 for unlimited attempts."
                 )],
             }
 
