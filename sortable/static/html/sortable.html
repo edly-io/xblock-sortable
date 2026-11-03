@@ -10,6 +10,7 @@
 		<p class="problem-statement">
 			{{question_text}}
 		</p>
+		<p class="sortable-instruction">{% trans "Drag each item or use the arrow controls." %}</p>
 		<ul class="items-list{% if locked %} is-locked{% endif %}" aria-label="{% trans 'Sort the items by dragging them or with the move up and move down buttons' %}">
 			{% for item, state_class in items %}
 				<li class="item{% if state_class %} {{ state_class }}{% endif %}"{% if item_style %} style="{{ item_style }}"{% endif %}>
@@ -18,10 +19,10 @@
 					<span class="item-text">{{item}}</span>
 					<span class="item-moves">
 						<button type="button" class="move-up" aria-label="{% trans 'Move up' %}"{% if forloop.first or locked %} disabled{% endif %}>
-							<svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M16 12.3V14.83L12 11.77L8 14.83V12.3L12 9.23L16 12.3Z" fill="currentColor"/></svg>
+							<svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M11 8.28L8 6.07L5 8.28V9.93L8 7.73L11 9.93V8.28Z" fill="currentColor"/></svg>
 						</button>
 						<button type="button" class="move-down" aria-label="{% trans 'Move down' %}"{% if forloop.last or locked %} disabled{% endif %}>
-							<svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M16 9.33V11.87L12 14.93L8 11.87V9.33L12 12.4L16 9.33Z" fill="currentColor"/></svg>
+							<svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M11 6.07L8 8.27L5 6.07V7.72L8 9.93L11 7.72V6.07Z" fill="currentColor"/></svg>
 						</button>
 					</span>
 				</li>
