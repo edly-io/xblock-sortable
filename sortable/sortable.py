@@ -19,7 +19,8 @@ class SortableXBlock(ScorableXBlockMixin ,XBlock):
     """
     An XBlock for sorting problems.
     """
-    FEEDBACK_MESSAGES = [_('Incorrect ({}/{})'), _('Correct ({}/{})')]
+    # Result banner titles, indexed by correct (Figma: Banner · Not quite / Correct)
+    FEEDBACK_MESSAGES = [_('Not quite'), _('Correct')]
     DEFAULT_DATA = ["Australia", "China", "Finland", "Pakistan", "United States"]
 
     weight = Float(
@@ -51,6 +52,17 @@ class SortableXBlock(ScorableXBlockMixin ,XBlock):
         help=_("The description of the problem or instructions shown to the learner."),
         scope=Scope.settings,
         default=_("Sort the following country names in alphabetical order"),
+        enforce_type=True,
+    )
+
+    explanation = String(
+        display_name=_("Explanation"),
+        help=_(
+            "Shown to learners in the result banner after they submit, whether "
+            "the answer is correct or not. Leave it blank for no explanation."
+        ),
+        scope=Scope.settings,
+        default="",
         enforce_type=True,
     )
 
@@ -208,6 +220,19 @@ class SortableXBlock(ScorableXBlockMixin ,XBlock):
             for position, item in enumerate(items)
         ]
 
+    def _feedback(self):
+        """
+        The result banner for the learner's last submission: whether it is
+        correct, its title and the author's explanation. None before the first
+        submission, so the explanation (which may give the answer away) never
+        reaches the page or student_view_data() before an attempt.
+        """
+        if not self.attempts:
+            return None
+        correct = int(self.raw_earned) == int(self.max_score())
+        message = self.i18n_service.gettext(self.FEEDBACK_MESSAGES[int(correct)])
+        return {'correct': correct, 'message': message, 'explanation': self.explanation}
+
     def item_style(self):
         """
         Inline CSS custom properties for author-chosen item colours. Colours
@@ -249,6 +274,7 @@ class SortableXBlock(ScorableXBlockMixin ,XBlock):
             'error_indicator': self.attempts and is_correct,
             'success_indicator': self.attempts and not is_correct,
             'item_style': self.item_style(),
+            'feedback': self._feedback(),
             'locked': self._is_locked(),
             'items': self.get_items_with_state(items)
         }
@@ -338,20 +364,17 @@ class SortableXBlock(ScorableXBlockMixin ,XBlock):
         self.attempts += 1
 
         self._mark_complete_and_publish_grade(submission)
-        
-        earned = self.raw_earned*self.weight
-        total = self.max_score()*self.weight
 
-        message = SortableXBlock.FEEDBACK_MESSAGES[int(self.raw_earned)].format(earned, total)
-        
+        feedback = self._feedback()
         return {
-            'correct': int(self.raw_earned)==int(self.max_score()),
+            'correct': feedback['correct'],
             'attempts': self.attempts,
-            'grade': earned,
+            'grade': self.raw_earned * self.weight,
             'remaining_attempts': self.remaining_attempts,
             'state': self.user_sequence,
             'marks': self._submission_marks(submission),
-            'message': message,
+            'message': feedback['message'],
+            'explanation': feedback['explanation'],
         }
 
     def studio_view(self, context):
@@ -398,6 +421,7 @@ class SortableXBlock(ScorableXBlockMixin ,XBlock):
         self.display_name = submissions['display_name']
         self.max_attempts = max_attempts
         self.question_text = submissions['question_text']
+        self.explanation = submissions.get('explanation', '')
         self.item_background_color = submissions['item_background_color']
         self.item_text_color = submissions['item_text_color']
         self.has_score = bool(submissions['has_score'])
