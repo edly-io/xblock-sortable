@@ -24,6 +24,15 @@
       <li class="field comp-setting-entry metadata_entry">
         <div class="wrapper-comp-setting">
           <label class="label setting-label">
+            <span>{{fields.explanation.display_name}}:</span>
+          </label>
+           <textarea class="field-data-control explanation" rows=3>{{self.explanation}}</textarea>
+        </div>
+        <span class="tip setting-help">{{fields.explanation.help}}</span>
+      </li>
+      <li class="field comp-setting-entry metadata_entry">
+        <div class="wrapper-comp-setting">
+          <label class="label setting-label">
               <span>{{fields.item_background_color.display_name}}:</span>
           </label>
           <input class="input setting-input item-background-color" value="{{self.item_background_color}}" />

@@ -36,9 +36,13 @@
 			<span class="icon fa fa-check" aria-hidden="true"></span>
 		</div>
 	</div>
-	<div class="notification notification-submit error is-hidden" tabindex="-1" aria-live="polite" aria-atomic="true" role="status">
-		<span class="icon fa" aria-hidden="true"></span>
-		<span class="notification-message">Incorrect (0/6 points)</span>
+	{# Rendered from the last submission so it is still there when the learner comes back. #}
+	<div class="notification notification-submit {% if not feedback %}is-hidden{% elif feedback.correct %}success{% else %}error{% endif %}" tabindex="-1" aria-live="polite" aria-atomic="true" role="status">
+		<span class="icon fa{% if feedback %} {% if feedback.correct %}fa-check{% else %}fa-close{% endif %}{% endif %}" aria-hidden="true"></span>
+		<span class="notification-message">{{ feedback.message }}</span>
+		{% if explanation %}
+		<p class="notification-explanation">{{ explanation|linebreaksbr }}</p>
+		{% endif %}
 	</div>
 	<div class="action">
 		<button id="submit-answer" class="submit btn-brand"{% if locked %} disabled{% endif %}>{% trans "Submit" %}</button>
