@@ -40,8 +40,8 @@
 	<div class="notification notification-submit {% if not feedback %}is-hidden{% elif feedback.correct %}success{% else %}error{% endif %}" tabindex="-1" aria-live="polite" aria-atomic="true" role="status">
 		<span class="icon fa{% if feedback %} {% if feedback.correct %}fa-check{% else %}fa-close{% endif %}{% endif %}" aria-hidden="true"></span>
 		<span class="notification-message">{{ feedback.message }}</span>
-		{% if explanation %}
-		<p class="notification-explanation">{{ explanation|linebreaksbr }}</p>
+		{% if feedback.explanation %}
+		<p class="notification-explanation">{{ feedback.explanation }}</p>
 		{% endif %}
 	</div>
 	<div class="action">

@@ -223,13 +223,15 @@ class SortableXBlock(ScorableXBlockMixin ,XBlock):
     def _feedback(self):
         """
         The result banner for the learner's last submission: whether it is
-        correct and its message. None before the first submission.
+        correct, its title and the author's explanation. None before the first
+        submission, so the explanation (which may give the answer away) never
+        reaches the page or student_view_data() before an attempt.
         """
         if not self.attempts:
             return None
         correct = int(self.raw_earned) == int(self.max_score())
         message = self.i18n_service.gettext(self.FEEDBACK_MESSAGES[int(correct)])
-        return {'correct': correct, 'message': message}
+        return {'correct': correct, 'message': message, 'explanation': self.explanation}
 
     def item_style(self):
         """
@@ -273,7 +275,6 @@ class SortableXBlock(ScorableXBlockMixin ,XBlock):
             'success_indicator': self.attempts and not is_correct,
             'item_style': self.item_style(),
             'feedback': self._feedback(),
-            'explanation': self.explanation,
             'locked': self._is_locked(),
             'items': self.get_items_with_state(items)
         }
@@ -373,6 +374,7 @@ class SortableXBlock(ScorableXBlockMixin ,XBlock):
             'state': self.user_sequence,
             'marks': self._submission_marks(submission),
             'message': feedback['message'],
+            'explanation': feedback['explanation'],
         }
 
     def studio_view(self, context):

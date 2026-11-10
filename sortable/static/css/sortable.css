@@ -158,6 +158,12 @@
   max-width: 1280px;
 }
 
+/* The author's explanation is plain text; keep their line breaks. */
+.sortable_block .notification .notification-explanation {
+  margin: 4px 0 0;
+  white-space: pre-line;
+}
+
 .sortable_block .notification.error {
   border-top: 3px solid #b20610;
 }
