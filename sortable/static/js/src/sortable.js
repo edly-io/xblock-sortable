@@ -1,8 +1,7 @@
 /* Javascript for SortableXBlock. */
-// Motion tokens: slow duration and the "move" easing.
-var SORTABLE_MOTION = {slow: 320, move: 'cubic-bezier(0.4, 0, 0.2, 1)'};
-
 function SortableXBlock(runtime, element) {
+    // Motion tokens: slow duration and the "move" easing.
+    var SORTABLE_MOTION = {slow: 320, move: 'cubic-bezier(0.4, 0, 0.2, 1)'};
     var $list = $(element).find('.items-list');
     var $live = $(element).find('.sortable-live');
 
@@ -21,7 +20,8 @@ function SortableXBlock(runtime, element) {
     }
 
     // Rows glide to their new place (FLIP) when moved with the buttons. Not
-    // during a drag: transforms would leak into jQuery UI's cached positions.
+    // during a drag: transforms would leak into jQuery UI's cached positions,
+    // so a drag start ends any glide still running.
     function measureRows($rows) {
         var base = $list[0].getBoundingClientRect();
         return $rows.map(function() {
@@ -219,6 +219,10 @@ function SortableXBlock(runtime, element) {
         $list.sortable({
             items: '> .item',
             start: function(event, ui) {
+                // A button glide may still be running: end it, then re-measure
+                // so jQuery UI's cached positions aren't the mid-glide ones.
+                stopGlides(getItems());
+                $list.sortable('refreshPositions');
                 ui.item.data('start_pos', ui.item.index());
                 showDragPosition(ui);
             },
