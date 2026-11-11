@@ -114,7 +114,17 @@ function SortableXBlock(runtime, element) {
                 var $attempts = $(element).find('.action .submission-feedback .attempts');
                 var $errorIndicator = $(element).find('.indicator-container.error');
                 var $successIndicator = $(element).find('.indicator-container.success');
-                $message.html(response.message);
+                $message.text(response.message);
+                // Only sent after a submission, so it isn't in the page before one.
+                var $explanation = $notification.find('.notification-explanation');
+                if (response.explanation) {
+                    if (!$explanation.length) {
+                        $explanation = $('<p class="notification-explanation"></p>').appendTo($notification);
+                    }
+                    $explanation.text(response.explanation);
+                } else {
+                    $explanation.remove();
+                }
                 $attempts.text(response.attempts);
                 $notification.removeClass('is-hidden success error');
                 if(response.correct) {

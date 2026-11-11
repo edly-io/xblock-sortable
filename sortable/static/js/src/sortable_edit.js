@@ -71,6 +71,7 @@ function SortableXBlockEdit(runtime, element) {
             'has_score': +($element.find(".has-score").val()),
             'weight': $element.find(".weight").val(),
             'question_text': $element.find('.question-text').val(),
+            'explanation': $element.find('.explanation').val(),
             'show_problem_header': $element.find('.show-problem-header').is(':checked'),
             'item_background_color': $element.find('.item-background-color').val(),
             'item_text_color': $element.find('.item-text-color').val(),

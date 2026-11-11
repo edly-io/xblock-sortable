@@ -20,6 +20,12 @@
   margin-bottom: 1.41575em;
 }
 
+/* The how-to line under the question. Only the LMS theme shows it; the list's
+   aria-label already gives screen readers the same instruction. */
+.sortable_block .sortable-instruction {
+  display: none;
+}
+
 /* counter-reset keeps the numbering from leaking across XBlock instances */
 .sortable_block ul.items-list {
   counter-reset: number;
@@ -150,6 +156,12 @@
   margin: 0.75rem auto 0;
   width: 100%;
   max-width: 1280px;
+}
+
+/* The author's explanation is plain text; keep their line breaks. */
+.sortable_block .notification .notification-explanation {
+  margin: 4px 0 0;
+  white-space: pre-line;
 }
 
 .sortable_block .notification.error {
