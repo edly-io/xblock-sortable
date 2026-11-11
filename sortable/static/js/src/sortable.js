@@ -20,8 +20,8 @@ function SortableXBlock(runtime, element) {
         $(element).find('.sortable_block').removeClass('is-just-checked');
     }
 
-    // Rows glide to their new place (FLIP). Positions are relative to the list
-    // so scrolling during a drag doesn't count as movement.
+    // Rows glide to their new place (FLIP) when moved with the buttons. Not
+    // during a drag: transforms would leak into jQuery UI's cached positions.
     function measureRows($rows) {
         var base = $list[0].getBoundingClientRect();
         return $rows.map(function() {
@@ -140,11 +140,6 @@ function SortableXBlock(runtime, element) {
         ui.item.find('.item-position').attr('data-position', slot);
     }
 
-    // The dragged row is positioned by jQuery UI; the others glide as the
-    // placeholder moves past them.
-    var $dragRows;
-    var dragRects;
-
     var handlerUrl = runtime.handlerUrl(element, 'submit_answer');
 
     $list.on('click', '.move-up', function() { moveItem($(this), 'up'); });
@@ -226,15 +221,9 @@ function SortableXBlock(runtime, element) {
             start: function(event, ui) {
                 ui.item.data('start_pos', ui.item.index());
                 showDragPosition(ui);
-                $dragRows = getItems().not(ui.item);
-                dragRects = measureRows($dragRows);
             },
             change: function(event, ui) {
                 showDragPosition(ui);
-                stopGlides($dragRows);
-                var after = measureRows($dragRows);
-                playGlides($dragRows, dragRects, after);
-                dragRects = after;
             },
             stop: function(event, ui) {
                 ui.item.find('.item-position').removeAttr('data-position');
