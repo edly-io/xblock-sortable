@@ -1,5 +1,7 @@
 /* Javascript for SortableXBlock. */
 function SortableXBlock(runtime, element) {
+    // Motion tokens: slow duration and the "move" easing.
+    var SORTABLE_MOTION = {slow: 320, move: 'cubic-bezier(0.4, 0, 0.2, 1)'};
     var $list = $(element).find('.items-list');
     var $live = $(element).find('.sortable-live');
 
@@ -14,6 +16,45 @@ function SortableXBlock(runtime, element) {
 
     function removeItemState() {
         getItems().removeClass('correct incorrect');
+        $(element).find('.sortable_block').removeClass('is-just-checked');
+    }
+
+    // Rows glide to their new place (FLIP) when moved with the buttons. Not
+    // during a drag: transforms would leak into jQuery UI's cached positions,
+    // so a drag start ends any glide still running.
+    function measureRows($rows) {
+        var base = $list[0].getBoundingClientRect();
+        return $rows.map(function() {
+            var rect = this.getBoundingClientRect();
+            return {left: rect.left - base.left, top: rect.top - base.top};
+        }).get();
+    }
+
+    // Only our own animations: the theme may animate these rows too.
+    function stopGlides($rows) {
+        $rows.each(function() {
+            var glide = $(this).data('glide');
+            if (glide) {
+                glide.cancel();
+            }
+        });
+    }
+
+    function playGlides($rows, before, after) {
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            return;
+        }
+        $rows.each(function(index) {
+            var dx = before[index].left - after[index].left;
+            var dy = before[index].top - after[index].top;
+            if (typeof this.animate !== 'function' || (Math.abs(dx) <= 1 && Math.abs(dy) <= 1)) {
+                return;
+            }
+            $(this).data('glide', this.animate(
+                [{transform: 'translate(' + dx + 'px, ' + dy + 'px)'}, {transform: 'none'}],
+                {duration: SORTABLE_MOTION.slow, easing: SORTABLE_MOTION.move}
+            ));
+        });
     }
 
     // `marks[i]` is 'correct' or 'incorrect' for the row at position i.
@@ -56,11 +97,16 @@ function SortableXBlock(runtime, element) {
         if (isLocked() || !$neighbour.length) {
             return;
         }
+        var $rows = getItems();
+        // Measured before the animations are stopped: this is where the rows look to be.
+        var before = measureRows($rows);
+        stopGlides($rows);
         if (direction === 'up') {
             $item.insertBefore($neighbour);
         } else {
             $item.insertAfter($neighbour);
         }
+        playGlides($rows, before, measureRows($rows));
         onOrderChanged($item);
         // Moving the row drops focus. Keep it on this row, on a button that
         // still works once the row reaches the top or bottom.
@@ -139,6 +185,13 @@ function SortableXBlock(runtime, element) {
                     $successIndicator.addClass('is-hidden');
                 }
                 setItemsState(response.marks);
+                // One-shot class for the theme's wrong-order shake. Never in the
+                // server markup, so a reload doesn't replay it.
+                var $block = $(element).find('.sortable_block').removeClass('is-just-checked');
+                if (!response.correct) {
+                    void $block[0].offsetWidth;  // restart the animation on a repeat wrong answer
+                    $block.addClass('is-just-checked');
+                }
                 if(response.correct || (response.remaining_attempts !== null && response.remaining_attempts <= 0)) {
                     lock();
                 } else {
@@ -166,6 +219,10 @@ function SortableXBlock(runtime, element) {
         $list.sortable({
             items: '> .item',
             start: function(event, ui) {
+                // A button glide may still be running: end it, then re-measure
+                // so jQuery UI's cached positions aren't the mid-glide ones.
+                stopGlides(getItems());
+                $list.sortable('refreshPositions');
                 ui.item.data('start_pos', ui.item.index());
                 showDragPosition(ui);
             },
