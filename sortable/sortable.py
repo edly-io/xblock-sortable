@@ -1,4 +1,5 @@
 """Sortable XBlock"""
+import math
 import random
 import pkg_resources
 from xblock.core import XBlock
@@ -204,10 +205,12 @@ class SortableXBlock(ScorableXBlockMixin ,XBlock):
 
     def get_weighted_score(self):
         """
-        Get weighted scores. No weight (blank or 0) means the raw score.
+        Get weighted scores, as the LMS grader computes them: a weight that
+        was never saved (None) grades the raw score, 0 is worth no points.
         """
-        weight = self.weight or 1
-        return self.raw_earned * weight, self.raw_possible * weight
+        if self.weight is None:
+            return self.raw_earned, self.raw_possible
+        return self.raw_earned * self.weight, self.raw_possible * self.weight
 
     def get_items_with_state(self, items):
         """
@@ -260,7 +263,7 @@ class SortableXBlock(ScorableXBlockMixin ,XBlock):
             random.shuffle(items)
 
         user_score, max_score = self.get_weighted_score()
-        is_correct = int(user_score)==int(max_score)
+        is_correct = self.raw_earned >= self.max_score()
         return {
             'display_name': self.display_name,
             'question_text': self.question_text,
@@ -421,13 +424,14 @@ class SortableXBlock(ScorableXBlockMixin ,XBlock):
                 )],
             }
 
-        # Blank and 0 both mean no points.
+        # Blank and 0 both mean no points: stored as 0, which the LMS grader
+        # leaves out of the grade (None would grade it out of 1).
         weight = str(submissions.get('weight') or '').strip()
         try:
-            weight = float(weight) if weight else None
+            weight = float(weight) if weight else 0.0
         except ValueError:
             weight = -1
-        if weight is not None and weight < 0:
+        if not math.isfinite(weight) or weight < 0:
             return {
                 'result': 'error',
                 'field': 'weight',
@@ -444,7 +448,7 @@ class SortableXBlock(ScorableXBlockMixin ,XBlock):
         self.item_background_color = submissions['item_background_color']
         self.item_text_color = submissions['item_text_color']
         self.has_score = bool(submissions['has_score'])
-        self.weight = weight or None
+        self.weight = weight
         self.data = submissions['data']
 
         return {
