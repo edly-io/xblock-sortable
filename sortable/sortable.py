@@ -25,9 +25,9 @@ class SortableXBlock(ScorableXBlockMixin ,XBlock):
 
     weight = Float(
         display_name=_("Problem Weight"),
-        help=_("Defines the number of points the problem is worth."),
+        help=_("Defines the number of points the problem is worth. Leave blank or set 0 for no points."),
         scope=Scope.settings,
-        default=1,
+        default=None,
         enforce_type=True,
     )
 
@@ -204,9 +204,10 @@ class SortableXBlock(ScorableXBlockMixin ,XBlock):
 
     def get_weighted_score(self):
         """
-        Get weighted scores
+        Get weighted scores. No weight (blank or 0) means the raw score.
         """
-        return self.raw_earned*self.weight, self.raw_possible*self.weight
+        weight = self.weight or 1
+        return self.raw_earned * weight, self.raw_possible * weight
 
     def get_items_with_state(self, items):
         """
@@ -269,6 +270,7 @@ class SortableXBlock(ScorableXBlockMixin ,XBlock):
             'item_text_color': self.item_text_color,
             'completed': self.completed,
             'graded': self.has_score,
+            'show_points': bool(self.weight),
             'user_score': user_score,
             'max_score': max_score,
             'error_indicator': self.attempts and is_correct,
@@ -369,7 +371,7 @@ class SortableXBlock(ScorableXBlockMixin ,XBlock):
         return {
             'correct': feedback['correct'],
             'attempts': self.attempts,
-            'grade': self.raw_earned * self.weight,
+            'grade': self.get_weighted_score()[0],
             'remaining_attempts': self.remaining_attempts,
             'state': self.user_sequence,
             'marks': self._submission_marks(submission),
@@ -412,9 +414,26 @@ class SortableXBlock(ScorableXBlockMixin ,XBlock):
         if max_attempts is not None and max_attempts < 0:
             return {
                 'result': 'error',
+                'field': 'max_attempts',
                 'messages': [self.i18n_service.gettext(
                     "Maximum attempts must be 0 or a positive whole number. "
                     "Leave it blank or set 0 for unlimited attempts."
+                )],
+            }
+
+        # Blank and 0 both mean no points.
+        weight = str(submissions.get('weight') or '').strip()
+        try:
+            weight = float(weight) if weight else None
+        except ValueError:
+            weight = -1
+        if weight is not None and weight < 0:
+            return {
+                'result': 'error',
+                'field': 'weight',
+                'messages': [self.i18n_service.gettext(
+                    "Problem weight must be 0 or a positive number. "
+                    "Leave it blank or set 0 for no points."
                 )],
             }
 
@@ -425,7 +444,7 @@ class SortableXBlock(ScorableXBlockMixin ,XBlock):
         self.item_background_color = submissions['item_background_color']
         self.item_text_color = submissions['item_text_color']
         self.has_score = bool(submissions['has_score'])
-        self.weight = float(submissions['weight'])
+        self.weight = weight or None
         self.data = submissions['data']
 
         return {

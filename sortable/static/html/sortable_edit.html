@@ -71,10 +71,12 @@
           </label>
             <input class="input setting-input weight"
              type="number"
-             min="1"
-             step="1"
-             value="{{self.weight}}" />
+             min="0"
+             step="any"
+             aria-describedby="weight-error-{{self.scope_ids.usage_id}}"
+             value="{{self.weight|default_if_none:''}}" />
         </div>
+        <span class="weight-error" id="weight-error-{{self.scope_ids.usage_id}}" role="alert" hidden>{% trans "Problem weight must be 0 or a positive number. Leave it blank or set 0 for no points." %}</span>
         <span class="tip setting-help">{{fields.weight.help}}</span>
       </li>
       <li class="field comp-setting-entry metadata_entry">
