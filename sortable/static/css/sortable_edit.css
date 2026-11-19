@@ -104,12 +104,14 @@
     display: none;
 }
 
-.sortable_block_edit .max-attempts-error {
+.sortable_block_edit .max-attempts-error,
+.sortable_block_edit .weight-error {
     color: #c32d3a;
     font-size: inherit;
 }
 
-.sortable_block_edit .max-attempts-error[hidden] {
+.sortable_block_edit .max-attempts-error[hidden],
+.sortable_block_edit .weight-error[hidden] {
     display: none;
 }
 

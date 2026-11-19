@@ -41,28 +41,35 @@ function SortableXBlockEdit(runtime, element) {
         updateItemsOrder();
     });
 
-    var $maxAttempts = $element.find('.max-attempts');
-    var $maxAttemptsError = $element.find('.max-attempts-error');
+    var fieldErrors = {
+        max_attempts: {$input: $element.find('.max-attempts'), $error: $element.find('.max-attempts-error')},
+        weight: {$input: $element.find('.weight'), $error: $element.find('.weight-error')},
+    };
 
-    function showMaxAttemptsError(message) {
+    function showFieldError(field, message) {
         if (message) {
-            $maxAttemptsError.text(message);
+            field.$error.text(message);
         }
-        $maxAttempts.attr('aria-invalid', 'true');
-        $maxAttemptsError.prop('hidden', false);
-        $maxAttempts.trigger('focus');
+        field.$input.attr('aria-invalid', 'true');
+        field.$error.prop('hidden', false);
+        field.$input.trigger('focus');
     }
 
-    $maxAttempts.on('input', function() {
-        $maxAttempts.removeAttr('aria-invalid');
-        $maxAttemptsError.prop('hidden', true);
+    $.each(fieldErrors, function(name, field) {
+        field.$input.on('input', function() {
+            field.$input.removeAttr('aria-invalid');
+            field.$error.prop('hidden', true);
+        });
     });
 
     $element.find('.save-button').bind('click', function(e) {
         e.preventDefault();
-        // min="0" step="1": the browser flags negatives, decimals and non-numbers.
-        if (!$maxAttempts[0].checkValidity()) {
-            showMaxAttemptsError();
+        // min="0": the browser flags negatives and non-numbers (and decimals for attempts).
+        var invalid = $.grep([fieldErrors.max_attempts, fieldErrors.weight], function(field) {
+            return !field.$input[0].checkValidity();
+        });
+        if (invalid.length) {
+            showFieldError(invalid[0]);
             return;
         }
         var data = {
@@ -87,9 +94,9 @@ function SortableXBlockEdit(runtime, element) {
                 runtime.notify('save', {state: 'end'});
             } else {
                 var message = response.messages.join(", ");
-                // The only server-side error today; show it next to the field,
-                // since some Studio editors don't display runtime notify errors.
-                showMaxAttemptsError(message);
+                // Show it next to the field, since some Studio editors
+                // don't display runtime notify errors.
+                showFieldError(fieldErrors[response.field] || fieldErrors.max_attempts, message);
                 runtime.notify('error', {
                     'title': "There was an error with your form.",
                     'message': message

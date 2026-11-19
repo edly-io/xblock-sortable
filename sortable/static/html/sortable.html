@@ -3,9 +3,11 @@
 	<h3 class="problem-header">
 		{{display_name}}
 	</h3>
+	{% if show_points %}
 	<div class="problem-progress">
 		<span class="grade">{{user_score}}</span>/{{max_score}} point {% if graded %} graded {% else %} ungraded {% endif %}
 	</div>
+	{% endif %}
 	<div class="problem">
 		<p class="problem-statement">
 			{{question_text}}
