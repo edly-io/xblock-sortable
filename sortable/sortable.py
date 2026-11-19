@@ -28,7 +28,7 @@ class SortableXBlock(ScorableXBlockMixin ,XBlock):
         display_name=_("Problem Weight"),
         help=_("Defines the number of points the problem is worth. Leave blank or set 0 for no points."),
         scope=Scope.settings,
-        default=None,
+        default=0.0,
         enforce_type=True,
     )
 
@@ -205,8 +205,8 @@ class SortableXBlock(ScorableXBlockMixin ,XBlock):
 
     def get_weighted_score(self):
         """
-        Get weighted scores, as the LMS grader computes them: a weight that
-        was never saved (None) grades the raw score, 0 is worth no points.
+        Get weighted scores, as the LMS grader computes them: 0 is worth no
+        points, None (a blank weight in OLX) grades the raw score.
         """
         if self.weight is None:
             return self.raw_earned, self.raw_possible

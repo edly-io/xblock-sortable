@@ -39,6 +39,11 @@ class WeightTest(unittest.TestCase):
             self.assertEqual(block.weight, 0.0, weight)
             self.assertFalse(block.student_view_data()['show_points'])
 
+    def test_default_is_no_points(self):
+        block = make_block()
+        self.assertEqual(block.weight, 0.0)
+        self.assertFalse(block.student_view_data()['show_points'])
+
     def test_positive_weight_is_saved_and_shown(self):
         block = make_block()
         self.assertEqual(studio_save(block, '2.5')['result'], 'success')
@@ -60,9 +65,9 @@ class WeightTest(unittest.TestCase):
     def test_weighted_score(self):
         block = make_block()
         block.set_score(Score(0.5, 1))
-        self.assertEqual(block.get_weighted_score(), (0.5, 1))  # never saved: raw score
-        block.weight = 0.0
-        self.assertEqual(block.get_weighted_score(), (0.0, 0.0))
+        self.assertEqual(block.get_weighted_score(), (0.0, 0.0))  # default: no points
+        block.weight = None
+        self.assertEqual(block.get_weighted_score(), (0.5, 1))  # blank in OLX: raw score
         block.weight = 4.0
         self.assertEqual(block.get_weighted_score(), (2.0, 4.0))
 
