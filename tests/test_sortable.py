@@ -7,11 +7,17 @@ import json
 import unittest
 from unittest import mock
 
+import django
+from django.conf import settings
 from xblock.field_data import DictFieldData
 from xblock.scorable import Score
 from xblock.test.tools import TestRuntime
 
 from sortable.sortable import SortableXBlock
+
+if not settings.configured:  # rendering the templates needs a Django config
+    settings.configure(TEMPLATES=[{'BACKEND': 'django.template.backends.django.DjangoTemplates'}])
+    django.setup()
 
 
 def make_block(**fields):
@@ -43,6 +49,12 @@ class WeightTest(unittest.TestCase):
         block = make_block()
         self.assertEqual(block.weight, 0.0)
         self.assertFalse(block.student_view_data()['show_points'])
+
+    def test_unset_weight_from_olx_is_shown_and_kept(self):
+        # weight="" in OLX is None, which the grader scores out of 1.
+        block = make_block(weight=None)
+        self.assertTrue(block.student_view_data()['show_points'])
+        self.assertIn('value="1"', block.studio_view(None).content)
 
     def test_positive_weight_is_saved_and_shown(self):
         block = make_block()

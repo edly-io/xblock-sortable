@@ -273,7 +273,8 @@ class SortableXBlock(ScorableXBlockMixin ,XBlock):
             'item_text_color': self.item_text_color,
             'completed': self.completed,
             'graded': self.has_score,
-            'show_points': bool(self.weight),
+            # None (weight="" in OLX) is graded out of 1, so it shows too.
+            'show_points': self.weight is None or self.weight > 0,
             'user_score': user_score,
             'max_score': max_score,
             'error_indicator': self.attempts and is_correct,

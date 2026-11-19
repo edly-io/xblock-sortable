@@ -74,7 +74,7 @@
              min="0"
              step="any"
              aria-describedby="weight-error-{{self.scope_ids.usage_id}}"
-             value="{% if self.weight %}{{self.weight}}{% endif %}" />
+             value="{% if self.weight is None %}1{% elif self.weight %}{{self.weight}}{% endif %}" />
         </div>
         <span class="weight-error" id="weight-error-{{self.scope_ids.usage_id}}" role="alert" hidden>{% trans "Problem weight must be 0 or a positive number. Leave it blank or set 0 for no points." %}</span>
         <span class="tip setting-help">{{fields.weight.help}}</span>
