@@ -56,12 +56,32 @@ class SortableXBlock(ScorableXBlockMixin ,XBlock):
         enforce_type=True,
     )
 
-    explanation = String(
-        display_name=_("Explanation"),
+    correct_feedback = String(
+        display_name=_("Correct answer feedback"),
         help=_(
-            "Shown to learners in the result banner after they submit, whether "
-            "the answer is correct or not. Leave it blank for no explanation."
+            "Shown to learners in the result banner when their answer is correct. "
+            "Leave it blank for no feedback."
         ),
+        scope=Scope.settings,
+        default="",
+        enforce_type=True,
+    )
+
+    incorrect_feedback = String(
+        display_name=_("Incorrect answer feedback"),
+        help=_(
+            "Shown to learners in the result banner when their answer is not correct. "
+            "Leave it blank for no feedback."
+        ),
+        scope=Scope.settings,
+        default="",
+        enforce_type=True,
+    )
+
+    # Legacy single explanation, shown for either result. No longer in the editor:
+    # it only fills in blank feedback on blocks saved before the split, and the
+    # next Studio save clears it.
+    explanation = String(
         scope=Scope.settings,
         default="",
         enforce_type=True,
@@ -227,15 +247,16 @@ class SortableXBlock(ScorableXBlockMixin ,XBlock):
     def _feedback(self):
         """
         The result banner for the learner's last submission: whether it is
-        correct, its title and the author's explanation. None before the first
-        submission, so the explanation (which may give the answer away) never
-        reaches the page or student_view_data() before an attempt.
+        correct, its title and the author's feedback for that result. None
+        before the first submission, so the feedback (which may give the answer
+        away) never reaches the page or student_view_data() before an attempt.
         """
         if not self.attempts:
             return None
         correct = int(self.raw_earned) == int(self.max_score())
         message = self.i18n_service.gettext(self.FEEDBACK_MESSAGES[int(correct)])
-        return {'correct': correct, 'message': message, 'explanation': self.explanation}
+        explanation = (self.correct_feedback if correct else self.incorrect_feedback) or self.explanation
+        return {'correct': correct, 'message': message, 'explanation': explanation}
 
     def item_style(self):
         """
@@ -445,7 +466,9 @@ class SortableXBlock(ScorableXBlockMixin ,XBlock):
         self.display_name = submissions['display_name']
         self.max_attempts = max_attempts
         self.question_text = submissions['question_text']
-        self.explanation = submissions.get('explanation', '')
+        self.correct_feedback = submissions.get('correct_feedback', '')
+        self.incorrect_feedback = submissions.get('incorrect_feedback', '')
+        self.explanation = ''
         self.item_background_color = submissions['item_background_color']
         self.item_text_color = submissions['item_text_color']
         self.has_score = bool(submissions['has_score'])

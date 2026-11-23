@@ -24,11 +24,20 @@
       <li class="field comp-setting-entry metadata_entry">
         <div class="wrapper-comp-setting">
           <label class="label setting-label">
-            <span>{{fields.explanation.display_name}}:</span>
+            <span>{{fields.correct_feedback.display_name}}:</span>
           </label>
-          <textarea class="field-data-control explanation" rows=3>{{self.explanation}}</textarea>
+          <input class="input setting-input correct-feedback" value="{{self.correct_feedback|default:self.explanation}}" />
         </div>
-        <span class="tip setting-help">{{fields.explanation.help}}</span>
+        <span class="tip setting-help">{{fields.correct_feedback.help}}</span>
+      </li>
+      <li class="field comp-setting-entry metadata_entry">
+        <div class="wrapper-comp-setting">
+          <label class="label setting-label">
+            <span>{{fields.incorrect_feedback.display_name}}:</span>
+          </label>
+          <input class="input setting-input incorrect-feedback" value="{{self.incorrect_feedback|default:self.explanation}}" />
+        </div>
+        <span class="tip setting-help">{{fields.incorrect_feedback.help}}</span>
       </li>
       <li class="field comp-setting-entry metadata_entry">
         <div class="wrapper-comp-setting">
