@@ -25,8 +25,8 @@ def make_block(**fields):
     return SortableXBlock(runtime, scope_ids=mock.Mock())
 
 
-def studio_save(block, weight='', max_attempts=''):
-    data = {
+def studio_save(block, weight='', max_attempts='', **extra):
+    data = {**extra,
         'display_name': 'Sort', 'question_text': 'q', 'max_attempts': max_attempts,
         'item_background_color': '', 'item_text_color': '', 'has_score': 1,
         'weight': weight, 'data': ['a', 'b', 'c'],
@@ -88,6 +88,32 @@ class WeightTest(unittest.TestCase):
         block.set_score(Score(2 / 3.0, 1))  # weighted 1.0 / 1.5
         view = block.student_view_data()
         self.assertFalse(view['error_indicator'])  # error_indicator is truthy when correct
+
+
+class FeedbackTest(unittest.TestCase):
+
+    def feedback(self, earned, **fields):
+        block = make_block(attempts=1, **fields)
+        block.set_score(Score(earned, 1))
+        return block.student_view_data()['feedback']['explanation']
+
+    def test_feedback_matches_result(self):
+        fields = {'correct_feedback': 'Well done', 'incorrect_feedback': 'Try again'}
+        self.assertEqual(self.feedback(1, **fields), 'Well done')
+        self.assertEqual(self.feedback(0.5, **fields), 'Try again')
+
+    def test_none_before_first_attempt(self):
+        self.assertIsNone(make_block(correct_feedback='x').student_view_data()['feedback'])
+
+    def test_legacy_explanation_fills_blank_feedback(self):
+        self.assertEqual(self.feedback(1, explanation='Old'), 'Old')
+        self.assertEqual(self.feedback(0, explanation='Old', incorrect_feedback='New'), 'New')
+
+    def test_studio_save_stores_both_and_clears_legacy(self):
+        block = make_block(explanation='Old')
+        self.assertIn('value="Old"', block.studio_view(None).content)
+        studio_save(block, correct_feedback='Yes', incorrect_feedback='No')
+        self.assertEqual((block.correct_feedback, block.incorrect_feedback, block.explanation), ('Yes', 'No', ''))
 
 
 if __name__ == '__main__':
