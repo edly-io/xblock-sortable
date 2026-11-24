@@ -218,10 +218,11 @@ class SortableXBlock(ScorableXBlockMixin ,XBlock):
 
     def _is_locked(self):
         """
-        Nothing left to do: the answer is correct or no attempts remain. Read
-        from the current settings, so an author raising the limit unlocks it.
+        No attempts remain. A correct answer doesn't lock: the learner may
+        reattempt while attempts are left. Read from the current settings, so
+        an author raising the limit unlocks it.
         """
-        return int(self.raw_earned) >= int(self.max_score()) or self._attempts_exhausted()
+        return self._attempts_exhausted()
 
     def get_weighted_score(self):
         """
@@ -374,7 +375,7 @@ class SortableXBlock(ScorableXBlockMixin ,XBlock):
         score = self._calculate_grade(submission)
         
         self.set_score(Score(score, self.max_score()))
-        self.completed = self._is_locked()
+        self.completed = self.completed or score >= self.max_score() or self._is_locked()
         self.user_sequence = self._get_submission_indexes(submission)
         self.publish_grade(self.score, False)
 
