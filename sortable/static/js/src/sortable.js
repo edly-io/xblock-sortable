@@ -87,6 +87,8 @@ function SortableXBlock(runtime, element) {
 
     function onOrderChanged($item) {
         removeItemState();
+        // Submit stays off after a correct answer until the order changes.
+        $(element).find('#submit-answer').prop('disabled', isLocked());
         updateMoveButtons();
         announcePosition($item);
     }
@@ -197,7 +199,8 @@ function SortableXBlock(runtime, element) {
                 if(response.remaining_attempts !== null && response.remaining_attempts <= 0) {
                     lock();
                 } else {
-                    $submit.prop('disabled', false);
+                    // Resubmitting the same correct order would only use up an attempt.
+                    $submit.prop('disabled', response.correct);
                 }
             },
             error: function (request, status, error) {
