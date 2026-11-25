@@ -121,6 +121,12 @@
   cursor: default;
 }
 
+/* Nothing left to move once locked: drop the drag handle and arrow buttons. */
+.sortable_block .items-list.is-locked .item-handle,
+.sortable_block .items-list.is-locked .item-moves {
+  display: none;
+}
+
 /* Screen-reader-only announcements of the new position after a move */
 .sortable_block .sortable-live {
   position: absolute;
