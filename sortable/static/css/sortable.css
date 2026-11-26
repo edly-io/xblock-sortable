@@ -121,7 +121,9 @@
   cursor: default;
 }
 
-/* Nothing left to move once locked: drop the drag handle and arrow buttons. */
+/* Nothing left to move once locked: drop the drag handle and arrow buttons.
+   Fallback without the Uber theme; the theme's _uber-sortable.scss
+   (tutor-contrib-uber) has the same rule, keep the two in step. */
 .sortable_block .items-list.is-locked .item-handle,
 .sortable_block .items-list.is-locked .item-moves {
   display: none;
