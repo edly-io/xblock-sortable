@@ -116,5 +116,29 @@ class FeedbackTest(unittest.TestCase):
         self.assertEqual((block.correct_feedback, block.incorrect_feedback, block.explanation), ('Yes', 'No', ''))
 
 
+class ReattemptTest(unittest.TestCase):
+    """A correct answer doesn't end the problem while attempts remain (UBER-454)."""
+
+    def submit(self, block, order):
+        request = mock.Mock(method='POST', body=json.dumps(order).encode())
+        return json.loads(block.submit_answer(request).body)
+
+    def test_reattempt_after_correct(self):
+        for max_attempts in (None, 0, 3):
+            block = make_block(data=['a', 'b', 'c'], max_attempts=max_attempts)
+            block.runtime.publish = mock.Mock()
+            self.assertTrue(self.submit(block, ['a', 'b', 'c'])['correct'])
+            self.assertFalse(block.student_view_data()['locked'], max_attempts)
+            self.assertTrue(block.completed)
+            self.assertFalse(self.submit(block, ['b', 'a', 'c'])['correct'])
+            self.assertTrue(block.completed)  # stays completed after a later wrong answer
+
+    def test_locked_when_attempts_used(self):
+        block = make_block(data=['a', 'b', 'c'], max_attempts=1)
+        block.runtime.publish = mock.Mock()
+        self.submit(block, ['a', 'b', 'c'])
+        self.assertTrue(block.student_view_data()['locked'])
+
+
 if __name__ == '__main__':
     unittest.main()

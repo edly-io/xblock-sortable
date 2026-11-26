@@ -87,6 +87,8 @@ function SortableXBlock(runtime, element) {
 
     function onOrderChanged($item) {
         removeItemState();
+        // Submit stays off after a correct answer until the order changes.
+        $(element).find('#submit-answer').prop('disabled', isLocked());
         updateMoveButtons();
         announcePosition($item);
     }
@@ -101,15 +103,17 @@ function SortableXBlock(runtime, element) {
         // Measured before the animations are stopped: this is where the rows look to be.
         var before = measureRows($rows);
         stopGlides($rows);
+        // Move the neighbour, not this row: moving the row out of the DOM
+        // would blur the clicked button and its focus ring would flicker.
         if (direction === 'up') {
-            $item.insertBefore($neighbour);
+            $neighbour.insertAfter($item);
         } else {
-            $item.insertAfter($neighbour);
+            $neighbour.insertBefore($item);
         }
         playGlides($rows, before, measureRows($rows));
         onOrderChanged($item);
-        // Moving the row drops focus. Keep it on this row, on a button that
-        // still works once the row reaches the top or bottom.
+        // Focus the clicked button (Safari doesn't on click), or the other one
+        // once this row reaches the top or bottom and the button is disabled.
         if ($button.prop('disabled')) {
             $item.find(direction === 'up' ? '.move-down' : '.move-up').trigger('focus');
         } else {
@@ -192,10 +196,11 @@ function SortableXBlock(runtime, element) {
                     void $block[0].offsetWidth;  // restart the animation on a repeat wrong answer
                     $block.addClass('is-just-checked');
                 }
-                if(response.correct || (response.remaining_attempts !== null && response.remaining_attempts <= 0)) {
+                if(response.remaining_attempts !== null && response.remaining_attempts <= 0) {
                     lock();
                 } else {
-                    $submit.prop('disabled', false);
+                    // Resubmitting the same correct order would only use up an attempt.
+                    $submit.prop('disabled', response.correct);
                 }
             },
             error: function (request, status, error) {

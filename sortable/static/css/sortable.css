@@ -104,6 +104,13 @@
   cursor: pointer;
 }
 
+/* :focus, not :focus-visible: the ring shows on mouse clicks too, by design
+   (UBER-454), so the clicked arrow is always highlighted, Safari included. */
+.sortable_block .items-list .item-moves button:focus {
+  outline: 2px solid #000000;
+  outline-offset: 2px;
+}
+
 .sortable_block .items-list .item-moves button:disabled {
   opacity: 0.4;
   cursor: default;
